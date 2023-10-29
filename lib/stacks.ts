@@ -12,8 +12,8 @@ export const useWallet = () => {
     showConnect({
       userSession: session,
       appDetails: {
-        name: "BitLoan",
-        icon: "https://freesvg.org/img/bitcoin.png",
+        name: "Gostack",
+        icon: "https://gostack.monster/logo.png",
       },
       onFinish: () => {
         window.location.reload()
@@ -25,10 +25,23 @@ export const useWallet = () => {
     session.signUserOut(window.location.origin)
   }
 
+  const isConnected = session?.isUserSignedIn()
+  const profile = isConnected ? session?.loadUserData()?.profile : {}
+
+  const addresses = {
+    stx: (profile?.stxAddress?.testnet ?? "") as string,
+    btc: (profile?.btcAddress?.p2wpkh?.testnet ?? "") as string,
+    isTestnet: true,
+    // TODO: Will add some logic later here. For Stacks Developer Program this will
+    // always be set to `true`
+  }
+
   return {
-    disconnect,
-    connect,
     session,
+    addresses,
+    connect,
+    disconnect,
+    isConnected,
     appConfig,
   }
 }
