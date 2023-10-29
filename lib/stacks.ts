@@ -30,6 +30,21 @@ export const useWallet = () => {
         window.location.reload()
       },
     })
+
+    setTimeout(() => {
+      // Add custom padding. Do not like current
+      const sheet = new CSSStyleSheet()
+      sheet.replaceSync(
+        [
+          ".modal-container .modal-body { padding: 1.5rem 2rem 2rem 2rem }",
+          ".modal-container .modal-title { margin-top: 0.25rem }",
+        ].join("")
+      )
+
+      document
+        .querySelector("connect-modal")
+        ?.shadowRoot?.adoptedStyleSheets.push(sheet)
+    })
   }
 
   const disconnect = () => {
