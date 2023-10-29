@@ -2,20 +2,16 @@ import { useState } from "react"
 import * as btc from "@scure/btc-signer"
 import { bytesToHex, hexToBytes } from "@noble/hashes/utils"
 
-import useOnOffMachine from "@/lib/useOnOffMachine"
 import { useNetwork, useWallet } from "@/lib/stacks"
-
+import BalanceSwitch, { useIsSatsDeposit } from "@/components/BalanceSwitch"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { IoWallet } from "react-icons/io5"
-
-import { HiSwitchHorizontal } from "react-icons/hi"
 
 function Deposit() {
-  const satsMachine = useOnOffMachine()
+  const [isSatsDeposit] = useIsSatsDeposit()
+  const [satoshis, setSatoshis] = useState(10000)
   const { addresses, publicKey, connect, isConnected } = useWallet()
   const { sbtc, sbtcWalletAddress, testnet } = useNetwork()
-  const [satoshis, setSatoshis] = useState(10000)
 
   const handleDeposit = async () => {
     if (!isConnected) return connect()
@@ -72,24 +68,13 @@ function Deposit() {
         minted to your logged-in account
       </p>
 
-      <nav className="flex justify-between mt-8 text-sm">
-        <div className="flex items-center gap-1.5">
-          <IoWallet />
-          <span>Balance ― 0.0003 BTC</span>
-        </div>
-        <button
-          onClick={satsMachine.toggle}
-          className="flex items-center gap-1 text-stacks-purple"
-        >
-          <span>Switch to {satsMachine.isOn ? "BTC" : "SAT"}</span>
-          <HiSwitchHorizontal />
-        </button>
-      </nav>
+      <BalanceSwitch isBTC />
+
       <div className="flex flex-col gap-4 mt-2">
         <Input
           type="balance"
           className="rounded-xl"
-          placeholder={satsMachine.isOn ? "1000 SAT" : "0.0001 BTC"}
+          placeholder={isSatsDeposit ? "1000 SAT" : "0.0001 BTC"}
         />
         <Button
           suppressHydrationWarning

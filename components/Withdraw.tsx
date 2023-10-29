@@ -1,13 +1,9 @@
-import useOnOffMachine from "@/lib/useOnOffMachine"
-
+import BalanceSwitch, { useIsSatsDeposit } from "@/components/BalanceSwitch"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { IoWallet } from "react-icons/io5"
-
-import { HiSwitchHorizontal } from "react-icons/hi"
 
 function Withdraw() {
-  const depositSAT = useOnOffMachine()
+  const [isSatsDeposit] = useIsSatsDeposit()
 
   return (
     <section className="border p-7 rounded-2xl bg-white shadow-lg shadow-black/5">
@@ -17,24 +13,13 @@ function Withdraw() {
         the BTC address of your logged-in account
       </p>
 
-      <nav className="flex justify-between mt-8 text-sm">
-        <div className="flex items-center gap-1.5">
-          <IoWallet />
-          <span>Balance ― 0.0003 sBTC</span>
-        </div>
-        <button
-          onClick={depositSAT.toggle}
-          className="flex items-center gap-1 text-stacks-purple"
-        >
-          <span>Switch to {depositSAT.isOn ? "sBTC" : "SAT"}</span>
-          <HiSwitchHorizontal />
-        </button>
-      </nav>
+      <BalanceSwitch />
+
       <div className="flex flex-col gap-4 mt-2">
         <Input
           type="balance"
           className="rounded-xl"
-          placeholder={depositSAT.isOn ? "1000 SAT" : "0.0001 sBTC"}
+          placeholder={isSatsDeposit ? "1000 SAT" : "0.0001 sBTC"}
         />
         <Button className="-mx-1 rounded-full h-14 text-xl bg-stacks-purple hover:bg-stacks-purple">
           Confirm Withdrawal
