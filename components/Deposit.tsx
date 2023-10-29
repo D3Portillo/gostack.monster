@@ -92,6 +92,7 @@ function Deposit() {
           placeholder={satsMachine.isOn ? "1000 SAT" : "0.0001 BTC"}
         />
         <Button
+          suppressHydrationWarning
           onClick={handleDeposit}
           className="-mx-1 rounded-full h-14 text-xl bg-stacks-purple hover:bg-stacks-purple"
         >
