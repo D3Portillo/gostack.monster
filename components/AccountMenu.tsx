@@ -2,6 +2,7 @@ import type { PropsWithChildren } from "react"
 import copy from "copy-to-clipboard"
 import { IoWallet } from "react-icons/io5"
 import { BsCheckCircleFill } from "react-icons/bs"
+import { LuCopy } from "react-icons/lu"
 
 import { useToast } from "@/components/ui/use-toast"
 import { beautifyAddress } from "@/lib/utils"
@@ -40,18 +41,26 @@ function AccountMenu({ children }: PropsWithChildren) {
       <DropdownMenuTrigger asChild>{children}</DropdownMenuTrigger>
       <DropdownMenuContent className="rounded-2xl [&_button]:cursor-pointer">
         <DropdownMenuLabel className="text-base font-semibold flex items-center gap-2">
-          <IoWallet />
+          <IoWallet className="text-[110%]" />
           <span>Wallet Addresses</span>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem asChild className="text-black/70 w-full">
+        <DropdownMenuItem
+          asChild
+          className="text-black/70 flex items-center gap-2 w-full"
+        >
           <button onClick={() => handleCopyContent(addresses.stx)}>
-            STX Address ― {beautifyAddress(addresses.stx)}
+            <LuCopy className="opacity-75 text-base" />
+            <span>STX Address ― {beautifyAddress(addresses.stx)}</span>
           </button>
         </DropdownMenuItem>
-        <DropdownMenuItem asChild className="text-black/70 w-full">
+        <DropdownMenuItem
+          asChild
+          className="text-black/70 flex items-center gap-2 w-full"
+        >
           <button onClick={() => handleCopyContent(addresses.btc)}>
-            BTC Address ― {beautifyAddress(addresses.btc)}
+            <LuCopy className="opacity-75 text-base" />
+            <span>BTC Address ― {beautifyAddress(addresses.btc)}</span>
           </button>
         </DropdownMenuItem>
         <DropdownMenuItem
