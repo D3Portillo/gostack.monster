@@ -6,6 +6,7 @@ import useOnOffMachine from "@/lib/useOnOffMachine"
 
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { IoWallet } from "react-icons/io5"
 
 import { HiSwitchHorizontal } from "react-icons/hi"
 
@@ -89,20 +90,26 @@ function Deposit() {
   }
 
   return (
-    <section className="border p-7 rounded-xl bg-gradient-to-tl from-stacks-purple/10 to-white">
+    <section className="border p-7 rounded-2xl bg-white shadow-lg shadow-black/5">
       <h2 className="text-2xl mb-2 font-bold">Deposit BTC, mint sBTC</h2>
       <p className="text-sm text-black/80">
-        Please input a BTC amount to mint sBTC (minimum: 0.0001 BTC). It will be
+        Input a BTC amount to mint sBTC (minimum: 0.0001 BTC). sBTC will be
         minted to your logged-in account
       </p>
 
-      <button
-        onClick={depositSAT.toggle}
-        className="flex items-center mt-8 gap-1 text-stacks-purple text-sm"
-      >
-        <span>Switch to {depositSAT.isOn ? "BTC" : "SAT"}</span>
-        <HiSwitchHorizontal />
-      </button>
+      <nav className="flex justify-between mt-8 text-sm">
+        <div className="flex items-center gap-1.5">
+          <IoWallet />
+          <span>Balance ― 0.0003 BTC</span>
+        </div>
+        <button
+          onClick={depositSAT.toggle}
+          className="flex items-center gap-1 text-stacks-purple"
+        >
+          <span>Switch to {depositSAT.isOn ? "BTC" : "SAT"}</span>
+          <HiSwitchHorizontal />
+        </button>
+      </nav>
       <div className="flex flex-col gap-4 mt-2">
         <Input
           type="balance"

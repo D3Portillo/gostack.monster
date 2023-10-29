@@ -19,6 +19,7 @@ module.exports = {
       colors: {
         stacks: {
           purple: "#5845fe",
+          celeste: "#f3f5fc",
         },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
