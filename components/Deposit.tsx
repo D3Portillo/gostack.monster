@@ -41,10 +41,6 @@ function Deposit() {
 
     const utxos = await testnet.fetchUtxos(addresses.btc)
 
-    const {
-      tr: { address: pegAddress },
-    } = await testnet.getBitcoinAccount(sbtc.WALLET_00)
-
     const tx = await sbtc.sbtcDepositHelper({
       ...({
         sbtcWalletAddress,
@@ -53,9 +49,9 @@ function Deposit() {
       } as any),
       network: sbtc.TESTNET,
       feeRate: await testnet.estimateFeeRate("low"),
+      pegAddress: await testnet.getSbtcPegAddress(),
       bitcoinChangeAddress: addresses.btc,
       stacksAddress: addresses.stx,
-      pegAddress,
       amountSats,
       utxos,
     })
@@ -87,8 +83,8 @@ function Deposit() {
     : amountSats > balances.btc.sats
 
   return (
-    <section className="border p-7 rounded-2xl bg-white shadow-lg shadow-black/5">
-      <h2 className="text-2xl mb-2 font-bold">Deposit BTC, mint sBTC</h2>
+    <section className="border p-7 pt-8 rounded-2xl bg-white shadow-lg shadow-black/5">
+      <h2 className="text-2xl mb-3 font-bold">Deposit BTC, mint sBTC</h2>
       <p className="text-sm text-black/80">
         Input a BTC amount to mint sBTC (minimum: 0.0001 BTC). sBTC will be
         minted to your logged-in account
@@ -96,8 +92,14 @@ function Deposit() {
 
       <BalanceSwitch
         isBTC
-        onClick={() => {
+        onClickMaxBalance={() =>
+          formattedInput.setValue(
+            balances.btc[isSatsDeposit ? "sats" : "decimal"]
+          )
+        }
+        onSwitch={() => {
           if (formattedInput.isEmpty) return
+
           formattedInput.setValue(
             safeConvert(formattedInput.value, isSatsDeposit ? "BTC" : "SAT")
           )

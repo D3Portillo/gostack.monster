@@ -2,6 +2,7 @@ import { withPreventDefault } from "@/lib/utils"
 import { useFormattedInputHandler } from "@/lib/input"
 import { useWallet } from "@/lib/stacks"
 import { useBalances } from "@/lib/swr"
+import { safeConvert } from "@/lib/number"
 
 import BalanceSwitch, { useIsSatsDeposit } from "@/components/BalanceSwitch"
 import { Button } from "@/components/ui/button"
@@ -29,14 +30,26 @@ function Withdraw() {
     : amountSats > balances.sbtc.sats
 
   return (
-    <section className="border p-7 rounded-2xl bg-white shadow-lg shadow-black/5">
-      <h2 className="text-2xl mb-2 font-bold">Deposit sBTC, withdraw BTC</h2>
+    <section className="border p-7 pt-8 rounded-2xl bg-white shadow-lg shadow-black/5">
+      <h2 className="text-2xl mb-3 font-bold">Deposit sBTC, withdraw BTC</h2>
       <p className="text-sm text-black/80">
         Input the amount of BTC you wish to withdraw. Balance will be sent to
         the BTC address of your logged-in account
       </p>
 
-      <BalanceSwitch />
+      <BalanceSwitch
+        onClickMaxBalance={() =>
+          formattedInput.setValue(
+            balances.sbtc[isSatsDeposit ? "sats" : "decimal"]
+          )
+        }
+        onSwitch={() => {
+          if (formattedInput.isEmpty) return
+          formattedInput.setValue(
+            safeConvert(formattedInput.value, isSatsDeposit ? "BTC" : "SAT")
+          )
+        }}
+      />
 
       <form
         onSubmit={withPreventDefault(handleDeposit)}

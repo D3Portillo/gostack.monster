@@ -8,7 +8,11 @@ import { HiSwitchHorizontal } from "react-icons/hi"
 const satsAtom = atom(false)
 export const useIsSatsDeposit = () => useAtom(satsAtom)
 
-function BalanceSwitch({ isBTC = false, onClick = () => {} }) {
+function BalanceSwitch({
+  isBTC = false,
+  onSwitch = () => {},
+  onClickMaxBalance = () => {},
+}) {
   const [isSatsDeposit, setIsDepositSats] = useIsSatsDeposit()
   const { addresses } = useWallet()
   const { data: balances } = useBalances(addresses)
@@ -17,18 +21,21 @@ function BalanceSwitch({ isBTC = false, onClick = () => {} }) {
   const TOKEN = isBTC ? "BTC" : "sBTC"
 
   function handleSwitch() {
-    onClick?.()
     setIsDepositSats((state) => !state)
+    onSwitch()
   }
 
   return (
     <nav className="flex justify-between mt-8 text-sm">
       <div className="flex items-center gap-1.5">
         <IoWallet />
-        <span>
-          Balance ― {isSatsDeposit ? balance.sats : balance.formatted}{" "}
-          {isSatsDeposit ? "SAT" : TOKEN}
-        </span>
+        <button className="hover:opacity-80" onClick={onClickMaxBalance}>
+          <span>Wallet Balance</span>{" "}
+          <strong className="font-medium">
+            {isSatsDeposit ? balance.sats : balance.formatted}{" "}
+            {isSatsDeposit ? "SAT" : TOKEN}
+          </strong>
+        </button>
       </div>
       <button
         onClick={handleSwitch}
