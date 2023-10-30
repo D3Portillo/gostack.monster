@@ -52,3 +52,7 @@ body {
 strong {
   @apply font-semibold;
 }
+
+[hidden] {
+  @apply opacity-0 pointer-events-none;
+}

@@ -1,9 +1,32 @@
+import { withPreventDefault } from "@/lib/utils"
+import { useFormattedInputHandler } from "@/lib/input"
+import { useWallet } from "@/lib/stacks"
+import { useBalances } from "@/lib/swr"
+
 import BalanceSwitch, { useIsSatsDeposit } from "@/components/BalanceSwitch"
-import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import InputNumberWithError from "./InputNumberWithError"
+
+import asset_sbtc from "@/assets/tokens/sbtc.svg"
 
 function Withdraw() {
   const [isSatsDeposit] = useIsSatsDeposit()
+  const formattedInput = useFormattedInputHandler()
+  const { addresses, connect, isConnected } = useWallet()
+  const { data: balances } = useBalances(addresses)
+
+  const amountSats = Number(
+    isSatsDeposit ? formattedInput.value : formattedInput.formattedValue
+  )
+
+  const handleDeposit = async () => {
+    if (!isConnected) return connect()
+    // Early exit if Wallet Not-Connected
+  }
+
+  const isBalanceUnavailable = formattedInput.isEmpty
+    ? false
+    : amountSats > balances.sbtc.sats
 
   return (
     <section className="border p-7 rounded-2xl bg-white shadow-lg shadow-black/5">
@@ -15,16 +38,26 @@ function Withdraw() {
 
       <BalanceSwitch />
 
-      <div className="flex flex-col gap-4 mt-2">
-        <Input
-          type="balance"
-          className="rounded-xl"
-          placeholder={isSatsDeposit ? "1000 SAT" : "0.0001 sBTC"}
+      <form
+        onSubmit={withPreventDefault(handleDeposit)}
+        className="flex flex-col mt-2"
+      >
+        <InputNumberWithError
+          tokenImage={asset_sbtc}
+          value={formattedInput.value}
+          tokenSymbol={isSatsDeposit ? "SATS" : "sBTC"}
+          onChange={formattedInput.onChangeHandler}
+          errorMessage={isBalanceUnavailable && "Balance unavailable"}
+          placeholder={isSatsDeposit ? "10000" : "0.0001"}
         />
-        <Button className="-mx-1 rounded-full h-14 text-xl bg-stacks-purple hover:bg-stacks-purple">
-          Confirm Withdrawal
+
+        <Button
+          suppressHydrationWarning
+          className="-mx-1 rounded-full h-14 text-xl bg-stacks-purple hover:bg-stacks-purple"
+        >
+          {isConnected ? "Confirm Withdrawal" : "Connect Wallet"}
         </Button>
-      </div>
+      </form>
     </section>
   )
 }

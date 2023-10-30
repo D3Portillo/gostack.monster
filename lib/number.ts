@@ -11,3 +11,12 @@ export function toPrecision(n: number | string, precision: number = 1) {
       .replace(/\.$/, "")
   )
 }
+
+export const safeConvert = (n = 0, convertTo: "SAT" | "BTC") => {
+  const isConvertToBTC = convertTo === "BTC"
+  const value = Number(n * (isConvertToBTC ? 1 / 1e8 : 1e8))
+  if (Number.isFinite(value)) {
+    return isConvertToBTC ? value : Math.round(value)
+  }
+  return 0
+}

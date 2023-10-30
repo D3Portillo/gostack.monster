@@ -1,21 +1,43 @@
-import { useState } from "react"
 import * as btc from "@scure/btc-signer"
 import { bytesToHex, hexToBytes } from "@noble/hashes/utils"
 
+import { safeConvert } from "@/lib/number"
+import { withPreventDefault } from "@/lib/utils"
+import { useFormattedInputHandler } from "@/lib/input"
 import { useNetwork, useWallet } from "@/lib/stacks"
-import BalanceSwitch, { useIsSatsDeposit } from "@/components/BalanceSwitch"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
+import { useToast } from "@/components/ui/use-toast"
+import { useBalances } from "@/lib/swr"
 
+import BalanceSwitch, { useIsSatsDeposit } from "@/components/BalanceSwitch"
+import { Button } from "@/components/ui/button"
+import InputNumberWithError from "./InputNumberWithError"
+
+import asset_btc from "@/assets/tokens/btc.svg"
+
+const MIN_SAT_DEPOSIT = 10000
 function Deposit() {
   const [isSatsDeposit] = useIsSatsDeposit()
-  const [satoshis, setSatoshis] = useState(10000)
+  const formattedInput = useFormattedInputHandler()
+  const { toast } = useToast()
   const { addresses, publicKey, connect, isConnected } = useWallet()
+  const { data: balances } = useBalances(addresses)
+
   const { sbtc, sbtcWalletAddress, testnet } = useNetwork()
+
+  const amountSats = Number(
+    isSatsDeposit ? formattedInput.value : formattedInput.formattedValue
+  )
 
   const handleDeposit = async () => {
     if (!isConnected) return connect()
     // Early exit if Wallet Not-Connected
+
+    if (MIN_SAT_DEPOSIT > amountSats) {
+      return toast({
+        title: "Balance Error",
+        description: "Balance should be greater than 0.0001 BTC",
+      })
+    }
 
     const utxos = await testnet.fetchUtxos(addresses.btc)
 
@@ -30,12 +52,12 @@ function Deposit() {
         // TODO: suggest to include or update typedefs
       } as any),
       network: sbtc.TESTNET,
+      feeRate: await testnet.estimateFeeRate("low"),
+      bitcoinChangeAddress: addresses.btc,
       stacksAddress: addresses.stx,
       pegAddress,
-      amountSats: satoshis,
-      feeRate: await testnet.estimateFeeRate("low"),
+      amountSats,
       utxos,
-      bitcoinChangeAddress: addresses.btc,
     })
 
     // convert the returned transaction object into a PSBT for Leather to use
@@ -60,6 +82,10 @@ function Deposit() {
     console.log(finalTx)
   }
 
+  const isBalanceUnavailable = formattedInput.isEmpty
+    ? false
+    : amountSats > balances.btc.sats
+
   return (
     <section className="border p-7 rounded-2xl bg-white shadow-lg shadow-black/5">
       <h2 className="text-2xl mb-2 font-bold">Deposit BTC, mint sBTC</h2>
@@ -68,22 +94,36 @@ function Deposit() {
         minted to your logged-in account
       </p>
 
-      <BalanceSwitch isBTC />
+      <BalanceSwitch
+        isBTC
+        onClick={() => {
+          if (formattedInput.isEmpty) return
+          formattedInput.setValue(
+            safeConvert(formattedInput.value, isSatsDeposit ? "BTC" : "SAT")
+          )
+        }}
+      />
 
-      <div className="flex flex-col gap-4 mt-2">
-        <Input
-          type="balance"
-          className="rounded-xl"
-          placeholder={isSatsDeposit ? "1000 SAT" : "0.0001 BTC"}
+      <form
+        onSubmit={withPreventDefault(handleDeposit)}
+        className="flex flex-col mt-2"
+      >
+        <InputNumberWithError
+          tokenImage={asset_btc}
+          value={formattedInput.value}
+          tokenSymbol={isSatsDeposit ? "SATS" : "BTC"}
+          onChange={formattedInput.onChangeHandler}
+          errorMessage={isBalanceUnavailable && "Balance unavailable"}
+          placeholder={isSatsDeposit ? "10000" : "0.0001"}
         />
+
         <Button
           suppressHydrationWarning
-          onClick={handleDeposit}
           className="-mx-1 rounded-full h-14 text-xl bg-stacks-purple hover:bg-stacks-purple"
         >
           {isConnected ? "Confirm Deposit" : "Connect Wallet"}
         </Button>
-      </div>
+      </form>
     </section>
   )
 }
