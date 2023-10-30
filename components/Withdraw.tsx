@@ -1,7 +1,11 @@
+import * as btc from "@scure/btc-signer"
+import { bytesToHex, hexToBytes } from "@noble/hashes/utils"
 import { withPreventDefault } from "@/lib/utils"
 import { useFormattedInputHandler } from "@/lib/input"
-import { useWallet } from "@/lib/stacks"
+import { useNetwork, useWallet } from "@/lib/stacks"
+
 import { useBalances } from "@/lib/swr"
+import { useSignMessage } from "@/lib/wallet"
 import { safeConvert } from "@/lib/number"
 
 import BalanceSwitch, { useIsSatsDeposit } from "@/components/BalanceSwitch"
@@ -13,16 +17,55 @@ import asset_sbtc from "@/assets/tokens/sbtc.svg"
 function Withdraw() {
   const [isSatsDeposit] = useIsSatsDeposit()
   const formattedInput = useFormattedInputHandler()
-  const { addresses, connect, isConnected } = useWallet()
+  const { addresses, connect, isConnected, publicKey } = useWallet()
   const { data: balances } = useBalances(addresses)
-
+  const { sbtc, sbtcWalletAddress, testnet } = useNetwork()
   const amountSats = Number(
     isSatsDeposit ? formattedInput.value : formattedInput.formattedValue
   )
 
+  const { lastSignature, signMessage, resetSignature } =
+    useSignMessage(amountSats)
+
   const handleDeposit = async () => {
     if (!isConnected) return connect()
     // Early exit if Wallet Not-Connected
+
+    if (!lastSignature) return signMessage()
+    // Continue until signed tx
+
+    const tx = await sbtc.sbtcWithdrawHelper({
+      ...({
+        sbtcWalletAddress,
+      } as any),
+      network: sbtc.TESTNET,
+      bitcoinAddress: addresses.btc,
+      amountSats,
+      signature: lastSignature!.signature,
+      feeRate: await testnet.estimateFeeRate("low"),
+      pegAddress: await testnet.getSbtcPegAddress(),
+      fulfillmentFeeSats: 2000,
+      utxos: await testnet.fetchUtxos(addresses.btc),
+      bitcoinChangeAddress: addresses.btc,
+    })
+
+    const txResponse = await window.btc.request("signPsbt", {
+      publicKey,
+      hex: bytesToHex(tx.toPSBT()),
+    })
+
+    const formattedTx = btc.Transaction.fromPSBT(
+      hexToBytes(txResponse.result.hex)
+    )
+
+    formattedTx.finalize()
+
+    const finalTx = await testnet.broadcastTx(formattedTx)
+
+    // Clean up signed tx
+    resetSignature()
+
+    console.log(finalTx)
   }
 
   const isBalanceUnavailable = formattedInput.isEmpty
@@ -68,7 +111,11 @@ function Withdraw() {
           suppressHydrationWarning
           className="-mx-1 rounded-full h-14 text-xl bg-stacks-purple hover:bg-stacks-purple"
         >
-          {isConnected ? "Confirm Withdrawal" : "Connect Wallet"}
+          {isConnected
+            ? lastSignature
+              ? "Confirm Withdrawal"
+              : "Sign Transaction"
+            : "Connect Wallet"}
         </Button>
       </form>
     </section>

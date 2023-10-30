@@ -39,8 +39,6 @@ function Deposit() {
       })
     }
 
-    const utxos = await testnet.fetchUtxos(addresses.btc)
-
     const tx = await sbtc.sbtcDepositHelper({
       ...({
         sbtcWalletAddress,
@@ -50,10 +48,10 @@ function Deposit() {
       network: sbtc.TESTNET,
       feeRate: await testnet.estimateFeeRate("low"),
       pegAddress: await testnet.getSbtcPegAddress(),
+      utxos: await testnet.fetchUtxos(addresses.btc),
       bitcoinChangeAddress: addresses.btc,
       stacksAddress: addresses.stx,
       amountSats,
-      utxos,
     })
 
     // convert the returned transaction object into a PSBT for Leather to use
