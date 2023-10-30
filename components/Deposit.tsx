@@ -109,6 +109,7 @@ function Deposit() {
         className="flex flex-col mt-2"
       >
         <InputNumberWithError
+          required={isConnected}
           tokenImage={asset_btc}
           value={formattedInput.value}
           tokenSymbol={isSatsDeposit ? "SATS" : "BTC"}

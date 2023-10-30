@@ -23,7 +23,6 @@ function InputNumberWithError({
     <Fragment>
       <div className="relative">
         <InputNumber
-          required
           className={cn("rounded-xl", isError && "!ring-red-500/20", className)}
           {...props}
         />

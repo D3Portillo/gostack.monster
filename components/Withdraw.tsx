@@ -99,6 +99,7 @@ function Withdraw() {
         className="flex flex-col mt-2"
       >
         <InputNumberWithError
+          required={isConnected}
           tokenImage={asset_sbtc}
           value={formattedInput.value}
           tokenSymbol={isSatsDeposit ? "SATS" : "sBTC"}
