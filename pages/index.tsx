@@ -3,6 +3,7 @@ import { Tabs, TabsList, TabsContent, TabsTrigger } from "@/components/ui/tabs"
 import Deposit from "@/components/Deposit"
 import Navigation from "@/components/Navigation"
 import Withdraw from "@/components/Withdraw"
+import SeoTags from "@/components/SeoTags"
 
 const TABS = {
   DEPOSIT: "DEPOSIT",
@@ -13,6 +14,7 @@ export default function Home() {
   return (
     <main className="container flex flex-col gap-8 items-center min-h-screen p-4">
       <Navigation />
+      <SeoTags />
       <Tabs defaultValue={TABS.DEPOSIT} className="w-full max-w-md">
         <TabsList className="grid bg-stacks-purple/5 border h-12 rounded-xl [&_button]:h-full [&_button]:rounded-lg w-full grid-cols-2">
           <TabsTrigger className="font-semibold" value={TABS.DEPOSIT}>
